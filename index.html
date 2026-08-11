@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<meta name="color-scheme" content="light dark">
+<title>Game Night Scoreboard</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #f7f7f5;
+    --text: #1c1e21;
+    --text-secondary: #6b6d70;
+    --text-muted: #9a9a95;
+    --card-bg: #ffffff;
+    --card-border: #e3e3df;
+    --input-bg: #ffffff;
+    --input-border: #d7d7d3;
+    --dash-border: #c3c3bd;
+    --accent: #3e7ce0;
+    --accent-text: #ffffff;
+    --control-bg: #f7f7f5;
+    --control-border: #d7d7d3;
+    --control-bg-active: #ececea;
+    --danger: #c0483f;
+    --success: #2c8a6b;
+    --leader-border: #3ba885;
+    --leader-bg: #eef8f4;
+    --leader-text: #2c8a6b;
+    --target-bg: #eaf2fb;
+    --target-border: #b8d4ee;
+    --target-text: #2f6fa8;
+    --target-num: #1c4f7d;
+    --winner-bg: #fff6e0;
+    --winner-border: #e0b64c;
+    --winner-text: #8a6614;
+    --slider-track: #dcdcd7;
+    --slider-thumb-border: #d7d7d3;
+    --slider-thumb-bg: #ffffff;
+    color-scheme: light;
+  }
+
+  html[data-theme="dark"] {
+    --bg: #14161a;
+    --text: #f2f2f0;
+    --text-secondary: #9a9a95;
+    --text-muted: #6f716f;
+    --card-bg: #1e2126;
+    --card-border: #2d2f35;
+    --input-bg: #1e2126;
+    --input-border: #34363c;
+    --dash-border: #45484f;
+    --accent: #5a8dee;
+    --accent-text: #ffffff;
+    --control-bg: #14161a;
+    --control-border: #3a3d44;
+    --control-bg-active: #24272d;
+    --danger: #d9736f;
+    --success: #7fc98f;
+    --leader-border: #3ba885;
+    --leader-bg: #14231e;
+    --leader-text: #3ba885;
+    --target-bg: #1c222c;
+    --target-border: #3a4a5c;
+    --target-text: #8fb8d9;
+    --target-num: #cfe6f7;
+    --winner-bg: #241f14;
+    --winner-border: #e0b64c;
+    --winner-text: #e0b64c;
+    --slider-track: #34363c;
+    --slider-thumb-border: none;
+    --slider-thumb-bg: #f2f2f0;
+    color-scheme: dark;
+  }
+
+  html[data-theme="casino"] {
+    --bg: #0d3b2c;
+    --text: #f5ecd2;
+    --text-secondary: #c9b98a;
+    --text-muted: #8fa799;
+    --card-bg: #123f30;
+    --card-border: #c9a227;
+    --input-bg: #0f2e23;
+    --input-border: #c9a227;
+    --dash-border: #7a8f83;
+    --accent: #c9a227;
+    --accent-text: #14231b;
+    --control-bg: #0f2e23;
+    --control-border: #c9a227;
+    --control-bg-active: #1a4a38;
+    --danger: #e0574a;
+    --success: #4fbf8f;
+    --leader-border: #e6c34a;
+    --leader-bg: #1e4a35;
+    --leader-text: #f0d878;
+    --target-bg: #1a2e22;
+    --target-border: #7a1f2b;
+    --target-text: #e0a5ab;
+    --target-num: #f2c9ce;
+    --winner-bg: #3a2a0c;
+    --winner-border: #e6c34a;
+    --winner-text: #f0d878;
+    --slider-track: #1a4a38;
+    --slider-thumb-border: #c9a227;
+    --slider-thumb-bg: #f5ecd2;
+    color-scheme: dark;
+  }
+
+  html, body {
+    background: var(--bg);
+  }
+  #bgLayer {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: -1;
+    transition: background 0.2s;
+  }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    user-select: none;
+    transition: color 0.2s;
+  }
+
+  /* ---------- Theme selector ---------- */
+  .theme-select {
+    display: flex;
+    gap: 0.4rem;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+  }
+  .theme-select button {
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--input-border);
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+  }
+  .theme-select button.active {
+    border-color: var(--accent);
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* ---------- Setup screen ---------- */
+  #setup {
+    width: 100%;
+    max-width: min(92vw, 520px);
+    margin-top: 1rem;
+  }
+  #setup h1 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 0.25rem;
+  }
+  #setup p.sub {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 1.75rem;
+  }
+  .player-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.7rem;
+  }
+  .player-row input {
+    flex: 1;
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--text);
+    font-size: 1.05rem;
+  }
+  .player-row input:focus { outline: 2px solid var(--accent); }
+  .player-row button.remove {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    border: 1px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--danger);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  #addPlayer {
+    width: 100%;
+    padding: 0.85rem;
+    border-radius: 10px;
+    border: 1px dashed var(--dash-border);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-top: 0.3rem;
+    margin-bottom: 1.75rem;
+  }
+  #targetRow {
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1.75rem;
+  }
+  #sliderSection {
+    transition: opacity 0.2s;
+  }
+  #targetRow .label {
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  #targetRow .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  #targetRow .bound {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    width: 1.6rem;
+    text-align: center;
+  }
+  #targetSlider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--fill, 50%), var(--slider-track) var(--fill, 50%), var(--slider-track) 100%);
+    outline: none;
+  }
+  #targetSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--slider-thumb-bg);
+    border: 1px solid var(--slider-thumb-border);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  #targetSlider::-moz-range-thumb {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--slider-thumb-bg);
+    border: 1px solid var(--slider-thumb-border);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  #noTargetToggle {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 0.9rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-decoration: underline;
+  }
+  #startBtn {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 12px;
+    border: none;
+    background: var(--accent);
+    color: var(--accent-text);
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  #startBtn:disabled { background: var(--dash-border); color: var(--text-muted); }
+
+  /* ---------- Scoreboard screen ---------- */
+  #board { display: none; width: 100%; max-width: min(94vw, 900px); }
+  #boardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  #resetBtn {
+    background: transparent;
+    border: 1px solid var(--input-border);
+    color: var(--text-secondary);
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+  }
+  #targetPill {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: var(--target-bg);
+    border: 1px solid var(--target-border);
+    border-radius: 999px;
+    padding: 0.55rem 1.2rem;
+    margin: 0 auto 1rem;
+    width: fit-content;
+    color: var(--target-text);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  #targetPill .num {
+    font-size: 1.3rem;
+    color: var(--target-num);
+  }
+  #cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 0.85rem;
+  }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .card.leader {
+    border-color: var(--leader-border);
+    background: var(--leader-bg);
+  }
+  .card .info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+    flex: 1;
+  }
+  .info .top { display: flex; align-items: center; gap: 0.7rem; }
+  .rank {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    width: 2.6rem;
+    flex-shrink: 0;
+  }
+  .card.leader .rank { color: var(--leader-text); }
+  .name {
+    font-size: 1.15rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .crown { font-size: 1rem; margin-left: 0.3rem; }
+  .progress-track {
+    height: 5px;
+    border-radius: 999px;
+    background: var(--card-border);
+    margin-left: 3.3rem;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.2s;
+  }
+  .card.leader .progress-fill { background: var(--leader-text); }
+  .score {
+    font-size: 2.1rem;
+    font-weight: 700;
+    flex: 0 0 3.2rem;
+    width: 3.2rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .card.leader .score { color: var(--leader-text); }
+  .controls { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+  .controls button {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 1px solid var(--control-border);
+    background: var(--control-bg);
+    color: var(--text);
+    font-size: 1.4rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .controls button:active { transform: scale(0.92); background: var(--control-bg-active); }
+  .controls button.minus { color: var(--danger); }
+  .controls button.plus { color: var(--success); }
+
+  #winnerBanner {
+    display: none;
+    text-align: center;
+    background: var(--winner-bg);
+    border: 1px solid var(--winner-border);
+    border-radius: 14px;
+    padding: 0.9rem;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: var(--winner-text);
+    font-weight: 600;
+  }
+
+  @media (orientation: landscape) and (max-height: 500px) {
+    body { padding: 0.6rem; }
+    #setup { margin-top: 0.3rem; }
+    .card { padding: 0.7rem 1rem; }
+    .controls button { width: 40px; height: 40px; }
+    .score { font-size: 1.7rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="bgLayer"></div>
+<div id="setup">
+  <div class="theme-select" data-target="setup"></div>
+  <h1>Game night scoreboard</h1>
+  <p class="sub">Add players, set a target score if you have one, and start.</p>
+  <div id="playerList"></div>
+  <button id="addPlayer">+ Add player</button>
+  <div id="targetRow">
+    <div id="sliderSection">
+      <div class="label" id="targetSliderLabel">Points to win: 10</div>
+      <div class="slider-row">
+        <span class="bound">3</span>
+        <input type="range" id="targetSlider" min="3" max="20" value="10" step="1">
+        <span class="bound">20</span>
+      </div>
+    </div>
+    <button id="noTargetToggle">Play without a target score</button>
+  </div>
+  <input type="hidden" id="targetInput" value="10">
+  <button id="startBtn">Start game</button>
+</div>
+
+<div id="board">
+  <div class="theme-select" data-target="board"></div>
+  <div id="boardHeader">
+    <span></span>
+    <button id="resetBtn">New game</button>
+  </div>
+  <div id="targetPill"><span>Points to win:</span><span class="num" id="targetPillNum"></span></div>
+  <div id="winnerBanner"></div>
+  <div id="cards"></div>
+</div>
+
+<script>
+  const THEMES = [
+    { id: 'light', label: 'Light', colorScheme: 'light' },
+    { id: 'dark', label: 'Dark', colorScheme: 'dark' },
+    { id: 'casino', label: 'Casino', colorScheme: 'dark' }
+  ];
+
+  function applyTheme(id) {
+    document.documentElement.dataset.theme = id;
+    const t = THEMES.find(t => t.id === id);
+    document.documentElement.style.colorScheme = t ? t.colorScheme : 'light';
+  }
+  applyTheme(document.documentElement.dataset.theme || 'light');
+
+  function renderThemeSelectors() {
+    document.querySelectorAll('.theme-select').forEach(el => {
+      el.innerHTML = THEMES.map(t =>
+        `<button data-theme-id="${t.id}" class="${document.documentElement.dataset.theme === t.id ? 'active' : ''}">${t.label}</button>`
+      ).join('');
+    });
+    document.querySelectorAll('.theme-select button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        applyTheme(btn.dataset.themeId);
+        renderThemeSelectors();
+      });
+    });
+  }
+  renderThemeSelectors();
+
+  const setupEl = document.getElementById('setup');
+  const boardEl = document.getElementById('board');
+  const playerListEl = document.getElementById('playerList');
+  const addPlayerBtn = document.getElementById('addPlayer');
+  const startBtn = document.getElementById('startBtn');
+  const targetInput = document.getElementById('targetInput');
+  const targetSlider = document.getElementById('targetSlider');
+  const targetSliderLabel = document.getElementById('targetSliderLabel');
+  const noTargetToggle = document.getElementById('noTargetToggle');
+  const sliderSection = document.getElementById('sliderSection');
+  const cardsEl = document.getElementById('cards');
+  const resetBtn = document.getElementById('resetBtn');
+  const winnerBanner = document.getElementById('winnerBanner');
+  const targetPill = document.getElementById('targetPill');
+  const targetPillNum = document.getElementById('targetPillNum');
+
+  let players = [];
+  let target = null;
+  let noTargetMode = false;
+
+  function addPlayerRow(value = '') {
+    if (playerListEl.children.length >= 8) return;
+    const row = document.createElement('div');
+    row.className = 'player-row';
+    row.innerHTML = `
+      <input type="text" placeholder="Player name" value="${value}" maxlength="18">
+      <button class="remove" aria-label="Remove player">×</button>
+    `;
+    row.querySelector('.remove').addEventListener('click', () => {
+      row.remove();
+      validateSetup();
+    });
+    row.querySelector('input').addEventListener('input', validateSetup);
+    playerListEl.appendChild(row);
+    validateSetup();
+  }
+
+  function validateSetup() {
+    const names = [...playerListEl.querySelectorAll('input')].map(i => i.value.trim());
+    const filled = names.filter(n => n.length > 0);
+    startBtn.disabled = filled.length < 2;
+  }
+
+  function updateSliderFill() {
+    const min = +targetSlider.min, max = +targetSlider.max, val = +targetSlider.value;
+    const pct = ((val - min) / (max - min)) * 100;
+    targetSlider.style.setProperty('--fill', pct + '%');
+  }
+  targetSlider.addEventListener('input', () => {
+    targetSliderLabel.textContent = `Points to win: ${targetSlider.value}`;
+    targetInput.value = targetSlider.value;
+    updateSliderFill();
+  });
+  updateSliderFill();
+
+  function setNoTargetMode(on) {
+    noTargetMode = on;
+    if (noTargetMode) {
+      sliderSection.style.opacity = '0.4';
+      sliderSection.style.pointerEvents = 'none';
+      noTargetToggle.textContent = 'Use a target score instead';
+    } else {
+      sliderSection.style.opacity = '1';
+      sliderSection.style.pointerEvents = 'auto';
+      noTargetToggle.textContent = 'Play without a target score';
+    }
+  }
+  noTargetToggle.addEventListener('click', () => setNoTargetMode(!noTargetMode));
+
+  addPlayerBtn.addEventListener('click', () => addPlayerRow());
+
+  startBtn.addEventListener('click', () => {
+    const names = [...playerListEl.querySelectorAll('input')]
+      .map(i => i.value.trim())
+      .filter(n => n.length > 0);
+    if (names.length < 2) return;
+    players = names.map(name => ({ name, score: 0 }));
+    target = noTargetMode ? null : parseInt(targetInput.value, 10);
+    setupEl.style.display = 'none';
+    boardEl.style.display = 'block';
+    if (target) {
+      targetPill.style.display = 'flex';
+      targetPillNum.textContent = target;
+    } else {
+      targetPill.style.display = 'none';
+    }
+    renderBoard();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    boardEl.style.display = 'none';
+    setupEl.style.display = 'block';
+  });
+
+  function ordinal(n) {
+    const s = ['th', 'st', 'nd', 'rd'];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  }
+
+  function renderBoard() {
+    const maxScore = Math.max(...players.map(p => p.score));
+    const winner = target ? players.find(p => p.score >= target) : null;
+
+    const byScore = [...players].sort((a, b) => b.score - a.score);
+    const rankOf = new Map();
+    byScore.forEach((p, i) => {
+      if (i === 0) { rankOf.set(p, 1); return; }
+      const prev = byScore[i - 1];
+      rankOf.set(p, p.score === prev.score ? rankOf.get(prev) : i + 1);
+    });
+
+    if (winner) {
+      winnerBanner.style.display = 'block';
+      winnerBanner.textContent = `${winner.name} wins with ${winner.score} points!`;
+    } else {
+      winnerBanner.style.display = 'none';
+    }
+
+    cardsEl.innerHTML = '';
+    players.forEach((p) => {
+      const isLeader = p.score === maxScore && maxScore > 0;
+      const card = document.createElement('div');
+      card.className = 'card' + (isLeader ? ' leader' : '');
+      const pct = target ? Math.min(100, Math.round((p.score / target) * 100)) : 0;
+      card.innerHTML = `
+        <div class="info">
+          <div class="top">
+            <span class="rank">${ordinal(rankOf.get(p))}</span>
+            <span class="name">${p.name}${isLeader ? '<span class="crown">👑</span>' : ''}</span>
+          </div>
+          ${target ? `<div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>` : ''}
+        </div>
+        <span class="score">${p.score}</span>
+        <div class="controls">
+          <button class="minus" aria-label="Subtract point">−</button>
+          <button class="plus" aria-label="Add point">+</button>
+        </div>
+      `;
+      card.querySelector('.minus').addEventListener('click', () => {
+        p.score = Math.max(0, p.score - 1);
+        renderBoard();
+      });
+      card.querySelector('.plus').addEventListener('click', () => {
+        p.score += 1;
+        renderBoard();
+      });
+      cardsEl.appendChild(card);
+    });
+  }
+
+  addPlayerRow();
+  addPlayerRow();
+</script>
+</body>
+</html>
