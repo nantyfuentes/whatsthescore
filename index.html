@@ -211,6 +211,11 @@
     border-radius: 10px;
     padding: 1rem 1.1rem;
     margin-bottom: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.9rem;
+    min-height: 128px;
   }
   #sliderSection {
     transition: opacity 0.2s;
@@ -264,7 +269,6 @@
     display: block;
     width: 100%;
     text-align: center;
-    margin-top: 0.9rem;
     background: transparent;
     border: none;
     color: var(--text-secondary);
@@ -546,12 +550,10 @@
   function setNoTargetMode(on) {
     noTargetMode = on;
     if (noTargetMode) {
-      sliderSection.style.opacity = '0.4';
-      sliderSection.style.pointerEvents = 'none';
+      sliderSection.style.display = 'none';
       noTargetToggle.textContent = 'Use a target score instead';
     } else {
-      sliderSection.style.opacity = '1';
-      sliderSection.style.pointerEvents = 'auto';
+      sliderSection.style.display = 'block';
       noTargetToggle.textContent = 'Play without a target score';
     }
   }
